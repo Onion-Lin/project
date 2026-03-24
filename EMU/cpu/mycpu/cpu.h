@@ -13,7 +13,8 @@ typedef struct instructions {
     uint32_t rd;        
     uint32_t rs1;    
     uint32_t rs2;      
-    uint32_t imm;        // 立即数
+    uint32_t imm12;        // 12bit立即数
+    uint32_t imm20;        // 20bit立即数
     uint32_t rs;        
     uint32_t addr;    
     uint32_t funct3;     // uw or funct3
@@ -38,4 +39,12 @@ void gpr_w(uint32_t addr, uint32_t data);
 //mem:0x1218
 //sum:
 
+//宏声明
+// 通用符号扩展函数（替代宏，更易调试）
+static inline uint32_t SEXT(uint32_t x, int len) {
+    int32_t sign_bit = 1 << (len - 1); // 符号位
+    // 如果符号位为1，高位补1；否则补0
+    return (x & (sign_bit - 1)) | ((x & sign_bit) ? (~(sign_bit - 1)) : 0);
+}
+//#define SEXT(x, len) ({ struct { int32_t n : len; } __x = { .n = x }; (uint32_t)__x.n; })  //符号扩展len位x至32位
 #endif

@@ -17,24 +17,24 @@ void execute(ins* instruc) {
 
         case 0b0010011:  // addi
                 val1 = gpr_r(instruc->rs1);
-                gpr_w(instruc->rd, val1 + instruc->imm);
+                gpr_w(instruc->rd, val1 + SEXT(instruc->imm12,12));
             break;
 
         case 0b0110111:  // lui
-                gpr_w(instruc->rd, instruc->imm << 12); 
+                gpr_w(instruc->rd, instruc->imm20 << 12); 
             break;
         
         case 0b0000011:{  // lw or lbu
             switch (instruc->funct3) {  
-                case 0b010:  // lw
-                        uint32_t addr = instruc->imm + gpr_r(instruc->rs1);
+                case 0b010:         // lw               
+                        uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
                         //连续读取四个字节并拼接
-                        uint32_t val = (ram_read(addr) << 24) | (ram_read(addr + 1) << 16) | (ram_read(addr + 2) << 8) | ram_read(addr + 3);
+                        uint32_t val = (ram_read(addr + 3) << 24) | (ram_read(addr + 2) << 16) | (ram_read(addr + 1) << 8) | ram_read(addr);
                         gpr_w(instruc->rd, val);
                     break;
 
                 case 0b100:{        // lbu
-                        uint32_t addr = instruc->imm + gpr_r(instruc->rs1);
+                        uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
                         //只取一个字节，零扩展到32位
                         uint32_t val = ram_read(addr) & 0xFF;  
                         gpr_w(instruc->rd, val);
@@ -50,20 +50,20 @@ void execute(ins* instruc) {
         case 0b0100011:{  // sw or sb
             switch (instruc->funct3) { 
                 case 0b010:{  // sw
-                
-                    uint32_t addr = instruc->imm + gpr_r(instruc->rs1);
+                    uint32_t addr = instruc->imm12 + gpr_r(instruc->rs1);
+                    //uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
                     uint32_t val = gpr_r(instruc->rs2);
 
-                    ram_write(addr, (val >> 24) & 0xFF);
-                    ram_write(addr + 1, (val >> 16) & 0xFF);
-                    ram_write(addr + 2, (val >> 8) & 0xFF);
-                    ram_write(addr + 3, val & 0xFF);
+                    ram_write(addr, (val ) & 0xFF);
+                    ram_write(addr + 1, (val >> 8) & 0xFF);
+                    ram_write(addr + 2, (val >> 16) & 0xFF);
+                    ram_write(addr + 3, (val >> 24) & 0xFF);
                 }
                 break;
 
                 case 0b000:{  // sb
                 
-                    uint32_t addr = instruc->imm + gpr_r(instruc->rs1);
+                    uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
                     uint8_t val = gpr_r(instruc->rs2) & 0xFF;
                     ram_write(addr, val);
                 }
@@ -79,10 +79,11 @@ void execute(ins* instruc) {
 
         case 0b1100111: { // jalr
             gpr_w(instruc->rd, PC + 4);  // 保存返回地址
-            instruc->addr = gpr_r(instruc->rs1) + instruc->imm;     // 赋值给instruc->addr
-            instruc->func = 0b1100011;                              // 让主循环的if_jump判断为真
+            instruc->addr = (gpr_r(instruc->rs1) + SEXT(instruc->imm12,12)) & ~1;  // 计算跳转地址
+            //pc_add(1,instruc->addr);
             break;
         }
+
 
         case(0b1110011):        // ebreak
             check = gpr_r(10);  // 读取a0寄存器的值判断读取是否正确

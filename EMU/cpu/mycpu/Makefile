@@ -1,5 +1,5 @@
 # 编译器选项
-CFLAGS = -Wall -O2 -g
+CFLAGS =  -O2 -g
 
 # 目标可执行文件名
 TARGET = mycpu
@@ -31,4 +31,4 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 
 # 清理规则
 clean:
-	rm -rf $(TARGET) $(OBJDIR)
+	rm -rf $(TARGET) $(OBJDIR) execution.log

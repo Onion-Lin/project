@@ -16,10 +16,11 @@ uint8_t* rom_init(char* ROMFILE) {
     fclose(fp);
     check(read_bytes < ROM_SIZE, "ROM read incomplete: %zu bytes", read_bytes);
 
-    rom[ebrekaddr] = 0x73;  // 在halt地址放置ebreak指令（opcode 0x73）
+    /*rom[ebrekaddr] = 0x73;  // 在halt地址放置ebreak指令（opcode 0x73）
     rom[ebrekaddr + 1] = 0x00;
     rom[ebrekaddr + 2] = 0x10;
-    rom[ebrekaddr + 3] = 0x00;
+    rom[ebrekaddr + 3] = 0x00;*/
+
     log_info("ROM initialized, read %zu bytes", read_bytes);
     return rom;
 
@@ -38,17 +39,6 @@ uint32_t rom_fetch(uint32_t PC) {
 error:
     return 0;  // 越界返回空指令
 }
-
-/*uint32_t rom_fetch(uint32_t PC) {
-    // 检查PC是否4字节对齐（RISC-V 32位指令必须对齐）
-    check((PC & 0x3) == 0, "PC is not 4-byte aligned: 0x%08X", PC);
-    // 小端序拼接：低地址字节 = 指令低8位
-    uint32_t instruction = rom[PC] | (rom[PC+1] << 8) | (rom[PC+2] << 16) | (rom[PC+3] << 24);
-    return instruction;
-
-error:
-    return 0;
-}*/
 
 
 void rom_free() {

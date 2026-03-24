@@ -16,37 +16,92 @@ int main(int argc, char* argv[]) {
     ram = ram_init();
     check(ram != NULL, "RAM initialization failed");
 
+    //printf("nononononononononono\n");
+    //fflush(stdout);
+
     // 分配指令结构体
     ins* instruc = calloc(1, sizeof(ins));
     check_mem(instruc);
 
+
+    //printf("in here\n");
+
+    //count
+    int cycle_count = 0;          
+    const int MAX_CYCLES = 10000; 
+
+    //log prepare
+    FILE* log_file = fopen("execution.log", "w");
+    check(log_file != NULL, "Failed to open log file: %s", clean_errno());
+    log_info("Starting execution loop, max cycles: %d", MAX_CYCLES);
+
     while (1) {
+        clear_instruc(instruc);  
+
+        // 超过最大周期
+        cycle_count++;
+        if (cycle_count > MAX_CYCLES) {
+            log_err("Dead loop detected: exceed max cycles (%d)", MAX_CYCLES);
+            break; 
+        }
+
+        // PC越界检查
+        if (PC >= 1024*2048) { 
+            log_warn("PC out of range or unaligned: 0x%08X, exit loop", PC);
+            break;
+        }
+
+        if(PC == 0x1218){       //HALT,exit
+            
+            log_info("\033[31m[SUCCESS]\033[0m HALT_Success: PC reached 0x1218 and reached halt loop");
+            fprintf(log_file, "\033[31m[SUCCESS]\033[0m HALT_Success: PC reached 0x1218 and reached halt loop\n");
+            fprintf(log_file, "\tTotal cycles: %d, a0: 0x%08X\n", cycle_count, GPR[10]);
+            fprintf(log_file, "\tFinal GPR state:\n");
+            for (int i = 0; i < 16; i++) {  
+                fprintf(log_file, "\tGPR[%d] = 0x%08X\n", i, GPR[i]);
+            }
+
+            break;
+        }
+
         // 取指
         check(PC + 3 < 1024*2048, "PC out of ROM range: 0x%08X", PC);
         uint32_t instruction = rom_fetch(PC);
 
+        //log info
+        fprintf(log_file, "PC: 0x%08x, ins: 0x%08x\n",PC,rom_fetch(PC));
+
         // 译码
         instruc = CU_ID(instruction, instruc);
+        fprintf(log_file, "\tfunc: 0x%02X, rd: %u, rs1: %u, rs2: %u, imm12: 0x%03X, imm20: 0x%05X\n", instruc->func, instruc->rd, instruc->rs1, instruc->rs2, instruc->imm12, instruc->imm20);
         check(instruc != NULL, "Instruction decode failed");
+        fprintf(log_file,"\tused GPR: rd = %u, rs1=%u, rs2=%u\n", GPR[instruc->rd], GPR[instruc->rs1], GPR[instruc->rs2]);
 
         // 执行
         execute(instruc);
+        fprintf(log_file, "\tresult: PC%d - 0x%08X\n", instruc->rd, gpr_r(instruc->rd));
 
         // 更新PC
-        int if_jump = (instruc->func == 0b1100011);  
-        pc_add(if_jump, instruc->addr);
+        pc_add((instruc->func == 0b1100011),instruc->addr);
+        /*if(instruc->func != 0b1100011){ 
+            pc_add(0,0);
+        } */
     }
 
     // 释放资源
     ram_free();
     rom_free();
     free(instruc);
+    fclose(log_file);
+    log_info("Execution finished, total cycles: %d,a0: 0x%08X", cycle_count, GPR[10]);
     return gpr_r(10); 
 
     error:
         if (ram) ram_free();
         if (rom) rom_free();
         if (instruc) free(instruc);
+        if (log_file) fclose(log_file);
+        log_info("Execution finished, total cycles: %d,a0: 0x%08X", cycle_count, GPR[10]);
         return 1;
 }
 
@@ -81,4 +136,8 @@ void pc_add(uint32_t if_jump, uint32_t jump) {
     } else {
         PC += 4;
     }
+}
+
+void clear_instruc (ins* instruc) {
+    memset(instruc, 0, sizeof(ins));
 }

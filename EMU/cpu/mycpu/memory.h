@@ -8,7 +8,7 @@
 extern uint8_t* rom;    // ROM指针（2MB）
 extern uint8_t* ram;    // RAM指针（2MB）
 
-// 函数声明（修正语法、统一命名风格）
+// 函数声明
 uint32_t rom_fetch(uint32_t PC);              
 uint8_t* rom_init();                             
 uint8_t* ram_init();                             
