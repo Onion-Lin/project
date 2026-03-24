@@ -1,2 +1,4 @@
 .vscode/launch.json
 .vscode/tasks.json
+EMU/cpu/mycpu/execution.log
+EMU/cpu/mycpu/build

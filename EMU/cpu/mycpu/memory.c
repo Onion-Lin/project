@@ -49,13 +49,22 @@ void rom_free() {
 }
 
 // RAM初始化
-uint8_t* ram_init() {
+uint8_t* ram_init(char* ROMFILE) {
+    FILE* fp = fopen(ROMFILE, "rb");
+    check(fp != NULL, "Failed to open rom.bin: %s", clean_errno()); 
+
     ram = calloc(RAM_SIZE, sizeof(uint8_t));  // RAM大小2MB
-    check(ram != NULL, "RAM allocation failed");
     log_info("RAM initialized (2MB)");
+    check_mem(ram);
+
+    size_t read_bytes = fread(ram, sizeof(uint8_t), RAM_SIZE, fp);
+    fclose(fp);
+
+    log_info("RAM initialization success , read %zu bytes", read_bytes);
     return ram;
 
 error:
+    if (fp) fclose(fp);
     if (ram) free(ram);
     ram = NULL;
     return NULL;

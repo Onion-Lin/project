@@ -16,11 +16,11 @@
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
-#define log_err(M, ...) fprintf(stderr,"[ERROR] ( %s - %s:%d: errno: %s) " M "\n", __FILE__,__func__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_err(M, ...) fprintf(stderr,"\033[37;41m[ERROR]\033[0m ( %s - %s:%d: errno: %s) " M "\n", __FILE__,__func__, __LINE__, clean_errno(), ##__VA_ARGS__)
 
-#define log_warn(M, ...) fprintf(stderr, "[WARN] ( %s - %s:%d: errno: %s) " M "\n", __FILE__,__func__, __LINE__, clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf(stderr, "\033[37;43m[WARN]\033[0m ( %s - %s:%d: errno: %s) " M "\n", __FILE__,__func__, __LINE__, clean_errno(), ##__VA_ARGS__)
 
-#define log_info(M, ...) fprintf(stderr, "[INFO] ( %s - %s:%d) " M "\n", __FILE__,__func__, __LINE__, ##__VA_ARGS__)
+#define log_info(M, ...) fprintf(stderr, "\033[37;44m[INFO]\033[0m ( %s - %s:%d) " M "\n", __FILE__,__func__, __LINE__, ##__VA_ARGS__)
 
 #define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 

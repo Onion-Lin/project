@@ -78,8 +78,9 @@ void execute(ins* instruc) {
 
 
         case 0b1100111: { // jalr
+            //指令的执行是有顺序的，先计算跳转地址，再保存返回地址，最后更新PC
+            instruc->addr = (GPR[instruc->rs1] + SEXT(instruc->imm12,12)) & ~1;  // 计算跳转地址
             gpr_w(instruc->rd, PC + 4);  // 保存返回地址
-            instruc->addr = (gpr_r(instruc->rs1) + SEXT(instruc->imm12,12)) & ~1;  // 计算跳转地址
             //pc_add(1,instruc->addr);
             break;
         }
