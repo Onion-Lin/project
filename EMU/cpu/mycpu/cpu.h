@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "dbg.h"
 #include "memory.h"
+#include "vga.h"
 
 // 指令结构体定义
 typedef struct instructions {
@@ -25,7 +26,7 @@ extern uint32_t GPR[16];     // 寄存器
 extern uint32_t PC;          
 extern uint8_t* rom;         // ROM
 extern uint8_t* ram;         // RAM
-
+extern char* binfile;        // 二进制文件路径
 
 // 函数声明
 void execute(ins* instruc);

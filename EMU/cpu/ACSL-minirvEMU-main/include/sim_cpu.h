@@ -1,5 +1,5 @@
 #ifndef SIM_CPU_H
-#define SIM_CPU_H 
+#define SIM_CPU_H
 #include <util.h>
 #include "memory.h"
 
@@ -15,6 +15,6 @@ void CPU_Fectch_Inst(struct CPU *cpu);
 bool CPU_Decode_Inst(struct CPU *cpu);
 void CPU_Exec_Inst(struct CPU *cpu);
 uint32_t CPU_Read(struct CPU *cpu, uint32_t target);
-
+uint32_t CPU_Get_PC(struct CPU *cpu);
 
 #endif

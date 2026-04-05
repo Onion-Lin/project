@@ -23,3 +23,7 @@ void CPU_Struct_Exec_Inst(){
 uint32_t CPU_Struct_Read(uint32_t target){
 	return simulate_cpu.read(&simulate_cpu, target);
 }
+
+uint32_t CPU_Struct_Get_PC(void){
+	return CPU_Get_PC(&simulate_cpu);
+}

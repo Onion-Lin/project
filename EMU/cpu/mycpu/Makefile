@@ -29,6 +29,11 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 # 包含依赖文件（如果存在）
 -include $(DEPENDS)
 
+.PHONY: clean
 # 清理规则
 clean:
 	rm -rf $(TARGET) $(OBJDIR) execution.log
+
+NAME = mycpu
+SRCS = $(wildcard $(SRCDIR)/*.c)
+include $(AM_HOME)/Makefile

@@ -27,5 +27,6 @@ void CPU_Struct_Fetch_Inst();
 bool CPU_Struct_Decode_Inst();
 void CPU_Struct_Exec_Inst();
 uint32_t CPU_Struct_Read(uint32_t target);
+uint32_t CPU_Struct_Get_PC(void);
 
 #endif

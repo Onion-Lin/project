@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat)",
+      "Bash(/^void *)",
+      "Bash(check)",
+      "Bash(data)",
+      "Bash(} *)",
+      "Bash(addr)",
+      "Bash(redraw)",
+      "Bash(})",
+      "Bash(eof)",
+      "Bash(make *)",
+      "Bash(make)",
+      "Bash(gcc *)",
+      "Bash(find *)",
+      "Bash(tail *)",
+      "Bash(gdb *)",
+      "Bash(./build/mycpu-native.elf)",
+      "Bash(timeout *)",
+      "Bash(ls *)",
+      "Bash(xargs *)",
+      "Bash(python3 *)",
+      "Bash(pkg-config *)",
+      "Bash(sleep *)",
+      "Bash(grep *)"
+    ]
+  },
+  "$version": 3
+}

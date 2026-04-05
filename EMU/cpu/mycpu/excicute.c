@@ -25,15 +25,19 @@ void execute(ins* instruc) {
             break;
         
         case 0b0000011:{  // lw or lbu
-            switch (instruc->funct3) {  
-                case 0b010:         // lw               
+            switch (instruc->funct3) {
+                case 0b010:         // lw
+                    {
                         uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
+                        check(addr + 3 < RAM_SIZE, "LW address out of range: 0x%08X", addr);
                         //连续读取四个字节并拼接
                         uint32_t val = (ram_read(addr + 3) << 24) | (ram_read(addr + 2) << 16) | (ram_read(addr + 1) << 8) | ram_read(addr);
                         gpr_w(instruc->rd, val);
+                    }
                     break;
 
                 case 0b100:{        // lbu
+                        check(ram != NULL, "RAM is NULL before lbu");
                         uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
                         //只取一个字节，零扩展到32位
                         uint32_t val = ram_read(addr) & 0xFF;  
@@ -48,10 +52,9 @@ void execute(ins* instruc) {
             break;
         }
         case 0b0100011:{  // sw or sb
-            switch (instruc->funct3) { 
+            switch (instruc->funct3) {
                 case 0b010:{  // sw
-                    uint32_t addr = instruc->imm12 + gpr_r(instruc->rs1);
-                    //uint32_t addr = SEXT(instruc->imm12,12) + gpr_r(instruc->rs1);
+                    uint32_t addr = SEXT(instruc->imm12, 12) + gpr_r(instruc->rs1);
                     uint32_t val = gpr_r(instruc->rs2);
 
                     ram_write(addr, (val ) & 0xFF);
@@ -89,6 +92,10 @@ void execute(ins* instruc) {
         case(0b1110011):        // ebreak
             check = gpr_r(10);  // 读取a0寄存器的值判断读取是否正确
             log_info("EBREAK encountered, a0=%u", check);
+            
+            // 在退出前渲染 VGA 图像
+            redraw();
+            
             check(check == 0x0, "EBREAK check failed", check);
 
             exit(check);

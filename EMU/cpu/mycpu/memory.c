@@ -1,8 +1,8 @@
 #include "cpu.h"
 
 // 硬件指针
-extern uint8_t* rom = NULL;
-extern uint8_t* ram = NULL;
+uint8_t* rom = NULL;
+uint8_t* ram = NULL;
 
 // ROM初始化
 uint8_t* rom_init(char* ROMFILE) {
@@ -72,6 +72,7 @@ error:
 
 // RAM读取
 uint8_t ram_read(uint32_t addr) {
+    check(ram != NULL, "RAM is NULL in ram_read");
     check(addr < RAM_SIZE, "RAM read out of range: 0x%08X", addr);
     return ram[addr];
 
@@ -79,10 +80,27 @@ error:
     return 0;
 }
 
-// RAM写入
+// RAM 写入
 void ram_write(uint32_t addr, uint8_t data) {
-    check(addr < RAM_SIZE, "RAM write out of range: 0x%08X", addr);
-    ram[addr] = data;
+    check(ram != NULL, "RAM is NULL in ram_write");
+
+    if (addr < 0x20000000) {        // mem
+        check(addr < RAM_SIZE, "RAM write out of range: 0x%08X", addr);
+        ram[addr] = data;
+    } else {                        // vga
+        check(addr < 0x20040000, "VGA write out of range: 0x%08X", addr);
+        // VGA 内存映射：按字节写入，但 color_buf 是 uint32_t 数组
+        // 需要将 4 个字节组合成一个 32 位像素值
+        uint32_t pixel_idx = (addr - 0x20000000) / 4;
+        uint32_t byte_offset = (addr - 0x20000000) % 4;
+        
+        // 读取当前像素值
+        uint32_t current_pixel = color_buf[pixel_idx];
+        
+        // 修改对应的字节
+        current_pixel = (current_pixel & ~(0xFF << (byte_offset * 8))) | (data << (byte_offset * 8));
+        color_buf[pixel_idx] = current_pixel;
+    }
 
 error:
     return;

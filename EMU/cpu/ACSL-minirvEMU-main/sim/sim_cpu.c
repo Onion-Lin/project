@@ -1,6 +1,7 @@
 #include <cpu.h>
 #include <sim_cpu.h>
 #include <inst.h>
+#include <memory.h>
 
 inline void GPR_Init(struct CPU *cpu){
 	for (int i = 0; i < GPR_NUM; i++){
@@ -15,18 +16,17 @@ void CPU_Init(struct CPU *cpu){
 	cpu->next_pc = cpu->pc;
 	cpu->circles = 0;
 	cpu->decode = (Decode){.inst = 0, .op = OP_ERROR, .op_type = OP_TYPE_ERROR};
-	cpu->exec_inst = CPU_Exec_Inst;
 	cpu->fetch_inst = CPU_Fectch_Inst;
-	cpu->decode_inst = CPU_Decode_Inst;	//
+	cpu->decode_inst = CPU_Decode_Inst;
 	cpu->exec_inst = CPU_Exec_Inst;
 	cpu->read = CPU_Read;
 }
 
 void CPU_Fectch_Inst(struct CPU *cpu){
-	// TODO()
-	// read inst by struct Memory
-	
-	cpu->decode.inst = 0xdeadbeef;
+	// 从内存中读取 4 字节指令（小端序）
+	uint32_t inst = Mem_Struct_read(cpu->pc, 0b010);
+	cpu->decode.inst = inst;
+	cpu->circles++;
 }
 
 bool CPU_Decode_Inst(struct CPU *cpu){
@@ -45,4 +45,8 @@ uint32_t CPU_Read(struct CPU *cpu, uint32_t target){
 		log_err(ERR_UNKNOWN, "Invalid GPR number: %d", target);
 		return 0;
 	}
+}
+
+uint32_t CPU_Get_PC(struct CPU *cpu){
+	return cpu->pc;
 }
